@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==========================================
+// ENUMS DE CONFIGURAÇÃO
+// ==========================================
+
+enum ProductType {
+  TORCIDA
+  POLICIA
+  FACCAO
+  FIVEM
+}
+
+enum LicenseStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  CANCELED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum PaymentMethod {
+  PIX
+  MANUAL
+  MERCADO_PAGO
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELED
+}
+
+// ==========================================
+// MÁQUINA DE VENDAS E LICENÇAS (SaaS)
+// ==========================================
+
+model Plan {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  productType  ProductType
+
+  price        Float
+  durationDays Int
+
+  description  String?
+  features     String?
+
+  isActive     Boolean        @default(true)
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  licenses     ProductLicense[]
+
+  @@index([productType, isActive])
+  @@map("plans")
+}
+
+model ProductLicense {
+  id          String        @id @default(cuid())
+
+  guildId     String?       // O ID do servidor Discord onde o bot vai funcionar
+  ownerId     String        // O ID do dono que comprou a licença
+
+  productType ProductType
+  planId      String
+
+  status      LicenseStatus @default(TRIAL)
+
+  activatedAt DateTime?
+  expiresAt   DateTime?
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  plan        Plan          @relation(fields: [planId], references: [id])
+  subscription Subscription?
+
+  // Garante que um dono só tenha 1 licença ativa por tipo de bot no mesmo servidor
+  @@unique([ownerId, productType])
+  @@index([guildId, productType])
+  @@index([ownerId])
+  @@map("product_licenses")
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+
+  licenseId   String             @unique
+
+  status      SubscriptionStatus @default(TRIAL)
+
+  startedAt   DateTime           @default(now())
+  expiresAt   DateTime?
+  renewalDate DateTime?
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  license     ProductLicense     @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  payments    Payment[]
+
+  @@index([licenseId])
+  @@index([status, expiresAt])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+
+  subscriptionId String
+
+  amount         Float
+
+  status         PaymentStatus @default(PENDING)
+  method         PaymentMethod @default(PIX)
+
+  mpPaymentId    String?       @unique
+
+  pixQrCode      String?
+  pixCopyPaste   String?
+
+  paidAt         DateTime?
+  failureReason  String?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, status])
+  @@map("payments")
+}

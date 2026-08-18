@@ -1,0 +1,22 @@
+# Dependencies and build
+/node_modules
+/build
+/dist
+
+# Local data
+/data
+*.db
+*.sqlite
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local configuration
+/firebase.json
+
+# Archives, binaries, and logs
+*.zip
+*.exe
+*.log

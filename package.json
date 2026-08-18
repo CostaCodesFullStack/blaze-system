@@ -1,0 +1,64 @@
+{
+  "name": "blazev2",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "check": "tsc --noEmit && echo ✔ Ok",
+    "build": "tsup",
+    "dev": "tsx --env-file=.env ./src/index.ts",
+    "dev:dev": "tsx --env-file=.env.dev ./src/index.ts",
+    "watch": "tsx --watch --env-file=.env ./src/index.ts",
+    "watch:dev": "tsx --watch --env-file=.env.dev ./src/index.ts",
+    "start": "node --env-file=.env .",
+    "start:dev": "node --env-file=.env.dev ."
+  },
+  "dependencies": {
+    "@constatic/base": "latest",
+    "@magicyan/discord": "1.7.3",
+    "@prisma/client": "^6.19.3",
+    "better-sqlite3": "^12.10.0",
+    "chalk": "5.6.2",
+    "discord.js": "14.26.2",
+    "express": "^5.2.1",
+    "zod": "4.1.11"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "22.16.4",
+    "prisma": "^6.19.3",
+    "tsup": "^8.3.5",
+    "tsx": "4.19.3",
+    "typescript": "5.9.3"
+  },
+  "imports": {
+    "#env": [
+      "./build/env.js"
+    ],
+    "#base": [
+      "./build/discord/index.js"
+    ],
+    "#functions": [
+      "./build/functions/index.js"
+    ],
+    "#database": [
+      "./build/database/index.js"
+    ],
+    "#server": [
+      "./build/server/index.js"
+    ],
+    "#menus": [
+      "./build/menus/index.js"
+    ],
+    "#tools": [
+      "./build/tools/index.js"
+    ],
+    "#lib/*": [
+      "./build/lib/*"
+    ],
+    "#shared/*": [
+      "./build/shared/*"
+    ]
+  },
+  "baseVersion": "1.5.7"
+}
